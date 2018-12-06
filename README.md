@@ -1,4 +1,5 @@
 # StellarStation API
+![GitHub release](https://img.shields.io/github/release/qubyte/rubidium.svg)
 
 The public API definition for [StellarStation](https://www.stellarstation.com/) and supported client
 libraries / helpers.
