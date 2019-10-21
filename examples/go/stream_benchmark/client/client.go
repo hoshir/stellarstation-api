@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package conn
+package client
 
 import (
+	"context"
 	"crypto/tls"
 	"os"
 	"strings"
@@ -22,6 +23,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/oauth"
+
+	stellarstation "github.com/infostellarinc/go-stellarstation/api/v1"
 )
 
 // NewDefaultCredentials initializes gRPC credentials using Stellar Default Credentials.
@@ -51,4 +54,26 @@ func Dial() (*grpc.ClientConn, error) {
 		apiUrl,
 		grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
 		grpc.WithPerRPCCredentials(creds))
+}
+
+func OpenStream(satelliteId string, conn *grpc.ClientConn) (stellarstation.StellarStationService_OpenSatelliteStreamClient, error) {
+	client := stellarstation.NewStellarStationServiceClient(conn)
+
+	stream, err := client.OpenSatelliteStream(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	req := stellarstation.SatelliteStreamRequest{
+		AcceptedFraming: []stellarstation.Framing{stellarstation.Framing_BITSTREAM},
+		SatelliteId:     satelliteId,
+		StreamId:        "",
+	}
+
+	err = stream.Send(&req)
+	if err != nil {
+		return nil, err
+	}
+
+	return stream, nil
 }
