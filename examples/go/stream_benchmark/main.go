@@ -208,11 +208,8 @@ func run() {
 	metricsData := MetricsData{}
 	gotFirstTime := false
 
-	var wg sync.WaitGroup{}
-	wg.Add(1	)
 	ticker := time.NewTicker(10 * time.Second)
 	go func() {
-		fmt.Println("Listening for messages")
 		for {
 			select {
 			case <-ticker.C:
@@ -221,25 +218,25 @@ func run() {
 		}
 	}()
 
+	//timer = RepeatTimer(int(interval), print_summary, args=(metricsData,))
+	fmt.Println("Listening for messages")
 
 	for {
 		res, err := stream.Recv()
-		go func() {
-			if err != nil {
-				log.Fatal(err)
-			}
+		if err != nil {
+			log.Fatal(err)
+		}
 
-			if !gotFirstTime {
-				gotFirstTime = true
-				fmt.Println("Receiving messages")
-			}
+		if !gotFirstTime {
+			gotFirstTime = true
+			fmt.Println("Receiving messages")
+		}
 
-			switch res.Response.(type) {
-			case *stellarstation.SatelliteStreamResponse_ReceiveTelemetryResponse:
-				telemetry := res.GetReceiveTelemetryResponse().Telemetry
-				metricsData.add(NewMetric(telemetry))
-			}
-		}()
+		switch res.Response.(type) {
+		case *stellarstation.SatelliteStreamResponse_ReceiveTelemetryResponse:
+			telemetry := res.GetReceiveTelemetryResponse().Telemetry
+			metricsData.add(NewMetric(telemetry))
+		}
 	}
 }
 
